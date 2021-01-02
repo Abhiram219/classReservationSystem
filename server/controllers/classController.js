@@ -25,6 +25,7 @@ function classController(){
         classType : req.body.classType,
         totalSessions : req.body.totalSessions,
         numberOfSeats : req.body.numberOfSeats,
+        startTime: req.body.startTime,
       }
 
       if(req.body.classType) {

@@ -18,9 +18,9 @@ const emailValidator = (email) => {
   return true;
 }
 
-const phoneNoValidator = (num) => {
-  var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-  return num.value.match(phoneno);
+const phoneNoValidator = (number) => {
+  const regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/
+  return regex.test(number);
 }
 
 const nameValidator = (name) => {

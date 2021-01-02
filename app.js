@@ -15,9 +15,12 @@ const router = require('./server/routes/mainRouter');
 
 app.use('/api/', router);
 
-// app.get('/', (req, res) => {
-//   res.send('Welcome to my API');
-// });
+// Error Handler Middleware
+router.use( (err,req,res,next) => {
+  console.log(err);
+  return res.status(500).json({message:err.message, stackTrace: err.stack})
+} )
+
 app.route('/ping').get( (req,res) => res.status(200).json({"response": "Everything is ok from app"}) )
 
 app.listen(port, () => {

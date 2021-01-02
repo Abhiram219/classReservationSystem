@@ -1,6 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const mainController = require('../controllers/mainController')();
+const User = require('../models/userModel');
+const Class = require('../models/classModel');
+const Reservation = require('../models/reservationModel')
+
+const mainController = require('../controllers/mainController')(User,Class,Reservation);
 const classRouter = require('./classRouter')
 
 const mainRouter = express.Router();

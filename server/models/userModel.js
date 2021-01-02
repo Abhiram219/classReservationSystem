@@ -10,6 +10,7 @@ const userSchema = new Schema({
     countryCode: {type:String, default:'+91'},
     number: {type:Number, validate: phoneNoValidator}
   },
+  coursesEnrolled : [mongoose.Schema.Types.ObjectId],
 },{versionKey:false});
 
 module.exports = mongoose.model('users', userSchema);
