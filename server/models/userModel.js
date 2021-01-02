@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 mongoose.pluralize(null);
 const {getDateinIST,emailValidator,nameValidator,phoneNoValidator} = require('../utilities/utils')
 const {Schema} = mongoose;

@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const mainController = require('../controllers/mainController')();
+const classRouter = require('./classRouter')
 
 const mainRouter = express.Router();
 
-
-
 let expFactor = 1;
-let DB_CONNECTION_STRING = 'mongodb+srv://Abhi:Abhi%40219@cluster0.n9mw0.mongodb.net/test?authSource=admin&replicaSet=atlas-11wkco-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true'
+let DB_CONNECTION_STRING = 'mongodb+srv://Abhi:Abhi%40219@cluster0.n9mw0.mongodb.net/kutuki?authSource=admin&replicaSet=atlas-11wkco-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true'
 
 /**
  * 
@@ -53,5 +53,10 @@ function connectToDb(res){
 
 mongoose.connection.on('close', () => {console.log("Connection Closed")});
 
+mainRouter.use('/class', classRouter)
+mainRouter.use('/reserveSeat', mainController.reserveSeat);
+mainRouter.use('/confirmReservation', mainController.confirmReservation);
+mainRouter.use('/cancelReservation', mainController.cancelReservation);
+mainRouter.use('/generateReport', mainController.report);
 
 module.exports = mainRouter;

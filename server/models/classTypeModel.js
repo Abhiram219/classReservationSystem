@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 mongoose.pluralize(null);
 const {nameValidator} = require('../utilities/utils')
 const {Schema} = mongoose;

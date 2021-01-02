@@ -1,4 +1,6 @@
 
+const classStatus = ['UPCOMING', 'ONGOING', 'COMPLETED']
+
 
 const getDateinIST = () => {
   const now = new Date(); //Date in UTC
@@ -26,5 +28,13 @@ const nameValidator = (name) => {
 }
 
 const classStatusValidator = (status) => {
-  return  ['UPCOMING', 'ONGOING', 'COMPLETED'].includes(status)
+  return classStatus.includes(status)
+}
+
+module.exports = {
+  getDateinIST,
+  emailValidator,
+  phoneNoValidator,
+  nameValidator,
+  classStatusValidator
 }

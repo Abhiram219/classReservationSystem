@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, '/dist')));
 
 const router = require('./server/routes/mainRouter');
 
-app.use('/api/cis', router);
+app.use('/api/', router);
 
 // app.get('/', (req, res) => {
 //   res.send('Welcome to my API');
