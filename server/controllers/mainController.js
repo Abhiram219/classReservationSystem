@@ -19,13 +19,13 @@ function mainController(User, Class, Reservation) {
         return res.status(400).json({ message: "Reservation doesn't exists" });
       }
       if (reservation.reservationStatus === 'cancelled') {
-        return res.status(200).json({ message: "Reservation is cancelled, cannot confirm cancelled Reservations" });
+        return res.status(400).json({ message: "Reservation is cancelled, cannot confirm cancelled Reservations" });
       }
       if (reservation.reservationStatus === 'confirmed') {
         return res.status(200).json({ message: "Reservation already confirmed" });
       }
       if (reservation.reservationStatus === 'expired') {
-        return res.status(200).json({ message: "Reservation has expired" });
+        return res.status(400).json({ message: "Reservation has expired" });
       }
 
       reservation.reservationStatus = 'confirmed';
@@ -76,10 +76,10 @@ function mainController(User, Class, Reservation) {
         return res.status(400).json({ message: "Reservation doesn't exists" });
       }
       if (reservation.reservationStatus === 'cancelled') {
-        return res.status(200).json({ message: "Reservation already cancelled" });
+        return res.status(400).json({ message: "Reservation already cancelled" });
       }
       if (reservation.reservationStatus === 'expired') {
-        return res.status(200).json({ message: "Reservation has expired" });
+        return res.status(400).json({ message: "Reservation has expired" });
       }
 
       reservation.reservationStatus = 'cancelled';
@@ -198,8 +198,53 @@ function mainController(User, Class, Reservation) {
     }
   }
 
-  function report(req, res, next) {
+  async function report(req, res, next) {
+    let result ={};
 
+    let classes = await Class.find();
+    result.totalNumberOfClases = classes.length;
+
+    let users = await User.find();
+    result.totalNumberOfUsersEnrolled = users.length;
+
+    let numberOfConfirmedSeatsPerClass = [], usersEnrolledPerClass= [], upcomingClases = 0, activeClasses = 0, completedClasses = 0;
+
+    await Promise.all( classes.map( async (item) => {
+      let temp = {};
+      temp.classId = item._id;
+      temp.className = item.name;
+      temp.confirmedSeats = item.seatsBooked;
+      numberOfConfirmedSeatsPerClass.push(temp);
+
+      if(item.status === 'UPCOMING'){
+        upcomingClases++;
+      } 
+      if(item.status === 'ONGOING'){
+        activeClasses++;
+      } 
+      if(item.status === 'COMPLETED'){
+        completedClasses++;
+      } 
+
+      let users = await User.find({ coursesEnrolled : item._id });
+
+      usersEnrolledPerClass.push({
+        classId : item._id,
+        className : item.name,
+        count : users.length
+      } );
+
+    } ) );
+    
+    result.numberOfConfirmedSeatsPerClass = numberOfConfirmedSeatsPerClass;
+    result.usersEnrolledPerClass = usersEnrolledPerClass;
+
+    result.numberOfActiveClasses = activeClasses;
+    result.numberOfUpcomingClasses = upcomingClases;
+    result.numberOfCompletedClasses = completedClasses;
+
+
+    return res.status(200).json(result);
   }
 
   return {

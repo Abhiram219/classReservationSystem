@@ -61,6 +61,6 @@ mainRouter.use('/class', classRouter)
 mainRouter.post('/reserveSeat', mainController.reserveSeat);
 mainRouter.patch('/confirmReservation', mainController.confirmReservation);
 mainRouter.patch('/cancelReservation', mainController.cancelReservation);
-mainRouter.use('/generateReport', mainController.report);
+mainRouter.use('/report', mainController.report);
 
 module.exports = mainRouter;
