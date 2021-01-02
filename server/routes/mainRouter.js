@@ -58,9 +58,9 @@ function connectToDb(res){
 mongoose.connection.on('close', () => {console.log("Connection Closed")});
 
 mainRouter.use('/class', classRouter)
-mainRouter.use('/reserveSeat', mainController.reserveSeat);
-mainRouter.use('/confirmReservation', mainController.confirmReservation);
-mainRouter.use('/cancelReservation', mainController.cancelReservation);
+mainRouter.post('/reserveSeat', mainController.reserveSeat);
+mainRouter.patch('/confirmReservation', mainController.confirmReservation);
+mainRouter.patch('/cancelReservation', mainController.cancelReservation);
 mainRouter.use('/generateReport', mainController.report);
 
 module.exports = mainRouter;

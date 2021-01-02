@@ -1,6 +1,7 @@
 const url = require('url');
 const mongoose = require('mongoose');
 const nodemailer = require("nodemailer");
+const scheduler = require('../helpers/scheduler');
 
 function mainController(User, Class, Reservation) {
 
@@ -22,6 +23,9 @@ function mainController(User, Class, Reservation) {
       }
       if (reservation.reservationStatus === 'confirmed') {
         return res.status(200).json({ message: "Reservation already confirmed" });
+      }
+      if (reservation.reservationStatus === 'expired') {
+        return res.status(200).json({ message: "Reservation has expired" });
       }
 
       reservation.reservationStatus = 'confirmed';
@@ -74,6 +78,9 @@ function mainController(User, Class, Reservation) {
       if (reservation.reservationStatus === 'cancelled') {
         return res.status(200).json({ message: "Reservation already cancelled" });
       }
+      if (reservation.reservationStatus === 'expired') {
+        return res.status(200).json({ message: "Reservation has expired" });
+      }
 
       reservation.reservationStatus = 'cancelled';
       await reservation.save({ session: session });
@@ -85,12 +92,11 @@ function mainController(User, Class, Reservation) {
         classObj.blockedSeats = classObj.blockedSeats - 1;
       } else {
         classObj.seatsBooked = classObj.seatsBooked - 1;
-        user.coursesEnrolled = user.coursesEnrolled.filter( () => item !== reservation.classId);
+        user.coursesEnrolled = user.coursesEnrolled.filter( item => { return item.toString() !== reservation.classId.toString() } );
         await user.save({ session: session });
       }
 
       await classObj.save({ session: session });
-
 
       await session.commitTransaction();
       session.endSession()
@@ -127,7 +133,7 @@ function mainController(User, Class, Reservation) {
         return res.status(400).json({ message: "No Seats are available for this class" });
       }
 
-      let user = await User.find({ name: req.body.name, email: req.body.email, }).session(session);
+      let user = await User.find({ name: req.body.name, email: req.body.email, "phone.number": req.body.phone.number  }).session(session);
 
       // User doesn't exists in db
       if (user === null || Object.keys(user).length === 0) {
@@ -144,7 +150,7 @@ function mainController(User, Class, Reservation) {
         userId = user[0]._id;
       }
 
-      let reservation = await Reservation.find({userId:userId, classId: classObj._id, reservationStatus:{$ne: 'cancelled'}});
+      let reservation = await Reservation.find({userId:userId, classId: classObj._id, reservationStatus:{ $ne: 'cancelled'}});
       if( Object.keys(reservation).length !== 0 ){
         return res.status(400).json({message:`Reservation for the user to this class already exists. Id ${reservation[0]._id}`})
       }
@@ -171,11 +177,13 @@ function mainController(User, Class, Reservation) {
         from: 'abhitest219@gmail.com', // sender address
         to: req.body.email, // list of receivers
         subject: `Class ${classObj.name} Reservation`, // Subject line
-        html: `<h1> Hi </h1> <a href=http://localhost:7800/api/confirmReservation?reservationId=${reservation._id} target='_blank'> Click to confirm Reservation</a>`, // html body
+        html: `<a href=http://localhost:7800/api/confirmReservation?reservationId=${reservation._id} target='_blank'> Click to confirm Reservation</a>`, // html body
       });
 
       classObj.blockedSeats = classObj.blockedSeats + 1;
       await classObj.save({ session: session });
+
+      scheduler(Reservation, Class, reservation._id);
 
       await session.commitTransaction();
       session.endSession()
