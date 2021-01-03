@@ -59,7 +59,7 @@ mongoose.connection.on('close', () => {console.log("Connection Closed")});
 
 mainRouter.use('/class', classRouter)
 mainRouter.post('/reserveSeat', mainController.reserveSeat);
-mainRouter.patch('/confirmReservation', mainController.confirmReservation);
+mainRouter.get('/confirmReservation', mainController.confirmReservation); //Using as get as to make api request from browser as we don't have ui
 mainRouter.patch('/cancelReservation', mainController.cancelReservation);
 mainRouter.use('/report', mainController.report);
 

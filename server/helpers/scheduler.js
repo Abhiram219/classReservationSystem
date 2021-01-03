@@ -40,7 +40,7 @@ function scheduler(Reservation, Class, reservationId){
     }
       
     
-  }, 20000 );
+  }, 300000 );
 }
 
 module.exports = scheduler

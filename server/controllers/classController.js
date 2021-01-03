@@ -1,15 +1,60 @@
 const Class = require('../models/classModel');
 const ClassType = require('../models/classTypeModel');
 const url = require('url');
+const classTypeModel = require('../models/classTypeModel');
+const { Console } = require('console');
 
 function classController(){
 
   async function getClass(req,res,next){
 
     try {
-      let classes = await Class.find();
-      // console.log(classes);
-      return res.status(200).json(classes);
+      const queryObj = url.parse(req.url, true).query;
+
+      let filters = {};
+      
+      queryObj.classStatus ? filters.status = queryObj.classStatus : '';
+
+      if(queryObj.classType){
+        let classType = await ClassType.findOne({name : queryObj.classType});
+        if(classType !== null) {
+          filters.classType = classType._id 
+        }else {
+          return res.status(200).json({});
+        } 
+      }
+
+      if(queryObj.startTime) {
+        let date = new Date(parseInt(queryObj.startTime) + 19800000); // 19800000 = (5*60 + 30min)*60 * 1000
+        filters.startTime = date;
+      }
+
+      let classes;
+      let pageNumber = parseInt(queryObj.pageNumber), pageSize = parseInt(queryObj.pageSize);
+      
+      // Pagination Indexing starts from 0.
+      if( pageNumber && pageSize ){
+        console.log('In Pagination query')
+        classes = await Class.find({...filters}).skip( pageNumber > 0 ? ( pageNumber * pageSize ) : 0 ).limit(pageSize);
+      }else{
+        classes = await Class.find({...filters});
+      }
+
+
+      // Mapping respective classTypes into classes
+      await Promise.all( classes.map( async (item,index) => {
+        let classType = await ClassType.findById(item.classType);
+        if(ClassType !== null){
+          let temp = {}
+          temp.classTypeName = classType.name;
+          temp.classTypeCode = classType.code;
+          classes[index] = { ...classes[index]._doc, ...temp}
+        }
+      } ) );
+
+
+      return res.status(200).json({data: classes});
+
     } catch (error) {
       return next(error);
     }
@@ -25,7 +70,6 @@ function classController(){
         classType : req.body.classType,
         totalSessions : req.body.totalSessions,
         numberOfSeats : req.body.numberOfSeats,
-        startTime: req.body.startTime,
       }
 
       if(req.body.classType) {
@@ -38,6 +82,10 @@ function classController(){
       // As below two fields are not required as per our schema
       req.body.seatsBooked ? newClassObj.seatsBooked = req.body.seatsBooked : '';
       req.body.status ? newClassObj.status = req.body.status : '';
+      if(req.body.startTime) {
+        let date = new Date(req.body.startTime + 19800000); // 19800000 = (5*60 + 30min)*60 * 1000
+        newClassObj.startTime = date;
+      }
 
       let newClass = new Class({...newClassObj});
   

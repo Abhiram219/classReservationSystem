@@ -8,7 +8,7 @@ const classSchema = new Schema({
   classType: {type:mongoose.ObjectId, required:true},
   totalSessions: {type:Number, min: 0, required: true},
   numberOfSeats: {type:Number, min: 0, required: true},
-  startTime: {type:String, required: true },
+  startTime: {type:Date, required: true },
   blockedSeats:  {type:Number, min: 0, default:0},
   seatsBooked: {type:Number, min: 0, default:0},
   status: {type:String, validate: classStatusValidator, default:"UPCOMING"}

@@ -128,6 +128,9 @@ function mainController(User, Class, Reservation) {
       if (classObj === null) {
         return res.status(400).json({ message: "Class is invalid" });
       }
+      if(classObj.status !== 'UPCOMING'){
+        return res.status(400).json({ message: "Cannot reserve seat for ongoing or completed classes" });
+      }
 
       if( classObj.numberOfSeats === classObj.seatsBooked + classObj.blockedSeats ){
         return res.status(400).json({ message: "No Seats are available for this class" });
@@ -150,7 +153,7 @@ function mainController(User, Class, Reservation) {
         userId = user[0]._id;
       }
 
-      let reservation = await Reservation.find({userId:userId, classId: classObj._id, reservationStatus:{ $ne: 'cancelled'}});
+      let reservation = await Reservation.find({userId:userId, classId: classObj._id, reservationStatus:{ $nin : ["cancelled", "expired"]}});
       if( Object.keys(reservation).length !== 0 ){
         return res.status(400).json({message:`Reservation for the user to this class already exists. Id ${reservation[0]._id}`})
       }
